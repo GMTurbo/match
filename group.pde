@@ -14,10 +14,13 @@ class group{
   float pitch = 0;
   int id = -1;
   
+  boolean opposite = false;
+   
   group(int xpos, int ypos, int guid, int tp){
     x = xpos;
     y = ypos;
     GUI = guid;
+    opposite = boolean(round(random(0,1)));
     yaw = random(0, PI);
     buildBlock(tp);
   }
@@ -316,7 +319,7 @@ class group{
   
   void SetSelected(int mX, int mY){
     
-    selected = abs(x - mX) < 20 &&  abs(y - mY) < 20;
+    selected = abs(x - mX) < 30 &&  abs(y - mY) < 30;
     
     for(block b : blocks)
       b.setSelected(selected);
@@ -330,17 +333,13 @@ class group{
       b.hide = hide;
       b.draw(yaw, pitch, timer); 
     }
+    
     if(!selected){
-      yaw += PI/800;
-      if(yaw > TWO_PI){
-         yaw = 0; 
-         
-       }
-       pitch += PI/800;
-       if(pitch > TWO_PI){
-         pitch = 0; 
-         
-       }
+      yaw += opposite ? PI/800 : -PI/800 ;
+      yaw = yaw % TWO_PI;
+       
+      pitch += opposite ? PI/800 : -PI/800 ;
+      pitch = pitch % TWO_PI;
     }
     
     if(hide){

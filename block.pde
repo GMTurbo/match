@@ -2,6 +2,7 @@
 class block{
   
    color c;
+   color cc;
    int x;
    int y;
    int z;
@@ -12,13 +13,16 @@ class block{
    
    int rotateX = 0; int rotateY = 0; int rotateZ = 0;
    
+   boolean useColor = true;
+   
    block(int xpos, int ypos, int zpos, int s){
     x = xpos;
     y = ypos;
     z = zpos;
     size = s;
     int v = int(random(20, 255));
-    c = color(v, v, v, 200);
+    if(!useColor)
+      c = color(v, v, v, 255);
    }
    
    block(int xpos, int ypos, int zpos, int s, float ang){
@@ -28,8 +32,10 @@ class block{
     size = s;
     //yaw = ang; 
     int v = int(random(20, 255));
-    c = color(v, v, v, 200);
+    c = color(v, v, v, 255);
    }
+   
+  
    
    block(int xpos, int ypos, int zpos, int s, float ang, int rotateAboutX, int rotateAboutY, int rotateAboutZ){
     x = xpos;
@@ -41,7 +47,10 @@ class block{
     size = s;
     //yaw = ang; 
     int v = int(random(90, 255));
+    
     c = color(v, v, v);
+    cc = color(int(random(10, 240)),int(random(10, 240)),int(random(10, 240)));
+      
    }
    
    void setSelected(boolean state){
@@ -57,7 +66,7 @@ class block{
      
      //yaw = y;
      //pitch = p;
-     if(hide ){
+     if( hide ){
          PVector start = new PVector(x, y, z);
          PVector end = new PVector(x, y, z + 100);
          PVector middle = PVector.lerp(start, end, timer );
@@ -96,12 +105,12 @@ class block{
        rotateZ(clock);
        
        translate(rotateX, rotateY, rotateZ);
-       fill(c);
+       fill(selected ? color(cc, 90) : cc);
        if(selected)
          stroke(color(125,223,252));
        else
         stroke(0);
-       strokeWeight(1);
+       strokeWeight(selected ? 1.0 : 0.5);
        
        box(size);
        
@@ -109,8 +118,7 @@ class block{
      }
      
      clock += PI/800;
-     if(clock > TWO_PI)
-       clock = -TWO_PI;
+     clock = clock%TWO_PI;
       
    } 
 }

@@ -1,17 +1,49 @@
+
+import ddf.minim.*;
 import damkjer.ocd.*;
 
 ArrayList<group> groups = new ArrayList<group>();
 
+Minim minim;
+AudioPlayer player;
+AudioPlayer match;
+AudioPlayer error;
+//AudioInput input;
 Camera camera1;
+int startingTime = 0;
+int endTime = 0;
 void setup(){
   
-  size(700,700, P3D);
-  
-  //smooth();
+  size(600, 850, P3D);
+  minim = new Minim(this);
+  player = minim.loadFile("closed.mp3");
+  //player.setVolume(0.5);
+  player.setGain(-18.0);
+  println(player.getControls());
+  match = minim.loadFile("matched.mp3");
+  match.setGain(-6.0);
+  //error = minim.loadFile("error.mp3");
+  player.loop();
+  player.play();
+  //input = minim.getLineIn();
+  smooth(8);
   camera1 = new Camera(this, width/2, height/2, 500);
   camera1.aim(width/2, height/2, 0);
+  PFont font= createFont("Helvetica Neue", 256, true);
+  textFont(font);
   initialize();
 }
+
+void stop()
+{
+  player.close();
+  match.close();
+  error.close();
+  
+  minim.stop();
+  super.stop();
+}
+
 int uidStep = 0;
 
 boolean alreadyHasTwo(int number, int[][] checkArray, int rows, int cols){
@@ -65,13 +97,15 @@ void initialize(){
        
        uidStep += int(random(uidStep, uidStep+5));
        
-       group g = new group(50 + i*stepX, 50+j*stepY, uidStep, typeArray[i][j]);
+       group g = new group(60 + i*stepX, 50+j*stepY, uidStep, typeArray[i][j]);
        
        groups.add(g);
        println(groups.size());
        
      }
    }
+   
+   startingTime = millis();
 }
 
 boolean canAdd(group check){
@@ -92,21 +126,53 @@ boolean canAdd(group check){
 
 void draw(){
   
+   
    background(255); 
    lights();
    //camera1.feed();
-
+   
+  // draw time
+   
+   int seconds = ((ended ? endTime : millis()) - startingTime) / 1000;
+   int minutes = seconds / 60;
+   int hours = minutes / 60;
+   seconds -= minutes * 60;
+   minutes -= hours * 60;
+   fill(255);
+   stroke(0);
+   float t = (endTimer > 1.0) ? 1.0 : endTimer;
+   
+   fill(0,0,0, ended ? 25 + t*255 :25);
+   textAlign(LEFT);
+   if(ended) {
+     textSize(80);
+     text("Finished",width/2 - 140,height/2 - 155, -50 + t*150);
+     textSize(256);
+   }
+     
+   text(( minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds),width/2 - 240,height/2 + 40, -50 + t*150);
+   
    
    stroke(0);
    strokeWeight(2);
+   
    rect(mouseX + 5/2, mouseY + 5/2, 5, 5);
    
    for(group g : groups){
-      
       g.draw(); 
    }
+   
+   if(endTimer > 2.8 && ended){
+      println("end sequence is done");
+      endTimer = 0;
+      ended = false;
+      initialize(); 
+   }else if(ended){ endTimer += 0.01; }
      
 }
+
+float endTimer = 0;
+boolean ended = false;
 
 void keyPressed(){
    switch(key){
@@ -169,8 +235,11 @@ void mousePressed(){
         done &= g.hide; 
      }
      
-     if(done)
-       exit();
+     if(done){
+       endTime = millis();
+       println("game ended");
+       ended = true;
+     }
      
   }
 }
@@ -178,10 +247,16 @@ void mousePressed(){
 void compareGroups(group g1, group g2){
    // if they are the same things then make them disappear and maybe do some text stuff
   if(g1.id == g2.id && g1 != g2){
+    //match.position(0);
+    match.rewind();
+     match.play();
      g1.hide();
      g2.hide();
      //showScore();
-  } 
+  } else{
+    // error.rewind();
+    // error.play(); 
+  }
 }
 
 void mouseReleased(){
