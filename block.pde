@@ -14,29 +14,7 @@ class block{
    int rotateX = 0; int rotateY = 0; int rotateZ = 0;
    
    boolean useColor = true;
-   
-   block(int xpos, int ypos, int zpos, int s){
-    x = xpos;
-    y = ypos;
-    z = zpos;
-    size = s;
-    int v = int(random(20, 255));
-    if(!useColor)
-      c = color(v, v, v, 255);
-   }
-   
-   block(int xpos, int ypos, int zpos, int s, float ang){
-    x = xpos;
-    y = ypos;
-    z = zpos;
-    size = s;
-    //yaw = ang; 
-    int v = int(random(20, 255));
-    c = color(v, v, v, 255);
-   }
-   
-  
-   
+
    block(int xpos, int ypos, int zpos, int s, float ang, int rotateAboutX, int rotateAboutY, int rotateAboutZ){
     x = xpos;
     y = ypos;

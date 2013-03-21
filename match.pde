@@ -65,6 +65,7 @@ boolean alreadyHasTwo(int number, int[][] checkArray, int rows, int cols){
 }
 void initialize(){
   //int offsetX = 
+  firstMouseDown = false;
     groups.clear();
     int boardX = 5;
     int boardY = 6;
@@ -105,7 +106,7 @@ void initialize(){
      }
    }
    
-   startingTime = millis();
+   
 }
 
 boolean canAdd(group check){
@@ -123,35 +124,36 @@ boolean canAdd(group check){
     return true;
      
 }
-
+boolean firstMouseDown = false;
 void draw(){
   
    
-   background(255); 
+   background(210); 
    lights();
    //camera1.feed();
    
   // draw time
-   
-   int seconds = ((ended ? endTime : millis()) - startingTime) / 1000;
-   int minutes = seconds / 60;
-   int hours = minutes / 60;
-   seconds -= minutes * 60;
-   minutes -= hours * 60;
-   fill(255);
-   stroke(0);
-   float t = (endTimer > 1.0) ? 1.0 : endTimer;
-   
-   fill(0,0,0, ended ? 25 + t*255 :25);
-   textAlign(LEFT);
-   if(ended) {
-     textSize(80);
-     text("Finished",width/2 - 140,height/2 - 155, -50 + t*150);
-     textSize(256);
-   }
+   if(firstMouseDown){
+     int seconds = ((ended ? endTime : millis()) - startingTime) / 1000;
+     int minutes = seconds / 60;
+     int hours = minutes / 60;
+     seconds -= minutes * 60;
+     minutes -= hours * 60;
+     fill(255);
+     stroke(0);
+     float t = (endTimer > 1.0) ? 1.0 : endTimer;
      
-   text(( minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds),width/2 - 240,height/2 + 40, -50 + t*150);
-   
+     fill(255,255,255, ended ? t*255 : 255);
+     textAlign(LEFT);
+     //strokeWeight(2);
+     if(ended) {
+       textSize(80);
+       text("Finished",width/2 - 140,height/2 - 155, -50 + t*150);
+       textSize(256);
+     }
+       
+     text(( minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds),width/2 - 240,height/2 + 40, -50 + t*150);
+     }
    
    stroke(0);
    strokeWeight(2);
@@ -190,6 +192,8 @@ void keyPressed(){
 int screenCap = 0;
 
 void mouseClicked(){
+    
+   
    for(group g: groups) 
      g.deSelectAll(); 
 }
@@ -201,6 +205,12 @@ group selectedGroup1 = null;
 group selectedGroup2 = null;
 int selectedCount = 1;
 void mousePressed(){
+  
+  if(firstMouseDown == false){
+     firstMouseDown = true;
+     startingTime = millis();
+    }
+    
   current = null;
   for(group g: groups) { 
     g.selected = false;
