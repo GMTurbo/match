@@ -1,24 +1,32 @@
 
 import ddf.minim.*;
-import damkjer.ocd.*;
+//import damkjer.ocd.*;
+
+ArrayList<String> runTimes = new ArrayList<String>();
 
 ArrayList<group> groups = new ArrayList<group>();
+
+boolean saveGif = false;
+int gifFrameCount = 0;
 
 Minim minim;
 AudioPlayer player;
 AudioPlayer match;
 AudioPlayer error;
 //AudioInput input;
-Camera camera1;
+//Camera camera1;
 int startingTime = 0;
 int endTime = 0;
+
+PFont runningFont = createFont("Helvetica Neue", 256, true);//Helvetica Neue;
+
 void setup(){
   
   size(600, 850, P3D);
   minim = new Minim(this);
   player = minim.loadFile("closed.mp3");
   //player.setVolume(0.5);
-  player.setGain(-18.0);
+  player.setGain(-15.0);
   println(player.getControls());
   match = minim.loadFile("matched.mp3");
   match.setGain(-6.0);
@@ -26,11 +34,14 @@ void setup(){
   player.loop();
   player.play();
   //input = minim.getLineIn();
-  smooth(8);
-  camera1 = new Camera(this, width/2, height/2, 500);
-  camera1.aim(width/2, height/2, 0);
-  PFont font= createFont("Helvetica Neue", 256, true);
-  textFont(font);
+  
+  //
+  //camera1.aim(width/2, height/2, 0);
+//PFont font= createFont("Chalet", 256, true);//Helvetica Neue
+  //textFont(font);
+  //runTimes.add("TEST");
+  //back = loadImage("cube.jpg");
+  //back.resize(2*width, 2*height);
   initialize();
 }
 
@@ -63,8 +74,12 @@ boolean alreadyHasTwo(int number, int[][] checkArray, int rows, int cols){
    println("checkCount = "+ checkCount);// == 2;
    return checkCount == 2;
 }
+
+PFont chalet = createFont("Chalet", 256, true);
+
 void initialize(){
   //int offsetX = 
+  
   firstMouseDown = false;
     groups.clear();
     int boardX = 5;
@@ -105,8 +120,6 @@ void initialize(){
        
      }
    }
-   
-   
 }
 
 boolean canAdd(group check){
@@ -124,36 +137,73 @@ boolean canAdd(group check){
     return true;
      
 }
+
 boolean firstMouseDown = false;
+
 void draw(){
   
+   if(showMenu && !firstMouseDown){
+      rotateClock+=0.1;
+      rotateClock = rotateClock > 1.0 ? 1.0 : rotateClock;
+   }else{
+      
+      rotateClock-=0.1;
+      rotateClock = rotateClock > 0 ? rotateClock : 0.0;
+   }
    
-   background(210); 
+   rotateY(rotateClock*PI/2);
+   
+   //smooth(4);
+   
+   background(255); 
+   
    lights();
-   //camera1.feed();
    
+    float t = (endTimer > 1.0) ? 1.0 : endTimer;
+    
   // draw time
    if(firstMouseDown){
+     
      int seconds = ((ended ? endTime : millis()) - startingTime) / 1000;
      int minutes = seconds / 60;
      int hours = minutes / 60;
      seconds -= minutes * 60;
      minutes -= hours * 60;
-     fill(255);
+     fill(0);
      stroke(0);
-     float t = (endTimer > 1.0) ? 1.0 : endTimer;
      
-     fill(255,255,255, ended ? t*255 : 255);
-     textAlign(LEFT);
-     //strokeWeight(2);
+     fill(20, 20, 20, ended ? 50 + t * 205 : 50);
+     
+      textAlign(LEFT);
+      textFont(runningFont);
      if(ended) {
        textSize(80);
        text("Finished",width/2 - 140,height/2 - 155, -50 + t*150);
        textSize(256);
      }
+     
+     text(( minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds),width/2 - 240,height/2 + 40, -50 + t * 150);
        
-     text(( minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds),width/2 - 240,height/2 + 40, -50 + t*150);
+     
+   }else{
+     
+    textFont(chalet,80);
+    textAlign(LEFT);
+    fill(0, 128);
+    //textSize(80);
+    text("Match", width/2 - 110, height/2 , -50); 
+    
+   }
+   
+    textFont(chalet,80);
+    //textSize(80);
+    textAlign(LEFT);
+    fill(0, 12 - 12*t);
+    for(float i = 0 ; i < width; i+=float(width)/2.5 ){
+     for(int j = 0 ; j < height; j+=float(height/12)){
+         text("Match", round(i) - 49, j+5, -50); 
      }
+    }
    
    stroke(0);
    strokeWeight(2);
@@ -169,12 +219,40 @@ void draw(){
       endTimer = 0;
       ended = false;
       initialize(); 
-   }else if(ended){ endTimer += 0.01; }
+   }else if(ended){ 
+     endTimer += 0.01;
+   }
+   
+   //show scores
+   textFont(chalet, 80);
+   //textSize(40);
+   rotateY(-PI/2);
+   translate(0,0,-width);
+   //fill(128,128);
+   stroke(0);
+   //rect(20,0, width, height);
+   fill(0);
+   textAlign(LEFT);
+   text("History", 30, 20);
+   int yoffset = 150;
+   
+   for(String s : runTimes){
+       text(s, 70, yoffset+=120);
+   }
+   
+   rotateY(-PI/2);
+   
+   if(saveGif){
+      if(frameCount%2 == 0)
+        saveFrame("gif" + (gifFrameCount++) + ".png");
+  }
      
 }
 
 float endTimer = 0;
 boolean ended = false;
+boolean showMenu = false;
+float rotateClock = 0;
 
 void keyPressed(){
    switch(key){
@@ -187,13 +265,18 @@ void keyPressed(){
       break;
    } 
    
+   switch(keyCode){
+     case CONTROL:
+      showMenu = !showMenu;
+      if(showMenu) rotateClock = 0;
+     break; 
+   }
+   
 }
 
 int screenCap = 0;
 
 void mouseClicked(){
-    
-   
    for(group g: groups) 
      g.deSelectAll(); 
 }
@@ -206,8 +289,9 @@ group selectedGroup2 = null;
 int selectedCount = 1;
 void mousePressed(){
   
-  if(firstMouseDown == false){
+  if(!firstMouseDown && !showMenu){
      firstMouseDown = true;
+     textFont(runningFont);
      startingTime = millis();
     }
     
@@ -247,6 +331,12 @@ void mousePressed(){
      
      if(done){
        endTime = millis();
+       int seconds = (endTime - startingTime) / 1000;
+       int minutes = seconds / 60;
+       int hours = minutes / 60;
+       seconds -= minutes * 60;
+       minutes -= hours * 60;
+       runTimes.add("Duration: " + minutes + ":" + (seconds < 10 ? "0" + seconds : seconds));
        println("game ended");
        ended = true;
      }
@@ -295,16 +385,17 @@ void mouseDragged() {
   
   if(current == null){
    if(mouseButton == LEFT){
-      camera1.track(pmouseX - mouseX, pmouseY - mouseY);
+      //camera1.track(pmouseX - mouseX, pmouseY - mouseY);
     }
-    else if(mouseButton == RIGHT)
-      camera1.look(radians(mouseX - pmouseX) / 2.0, radians(mouseY - pmouseY) / 2.0); 
+    else if(mouseButton == RIGHT){
+      //camera1.look(radians(mouseX - pmouseX) / 2.0, radians(mouseY - pmouseY) / 2.0); 
+    }
   }
 }
 
 void mouseMoved(){
   if(keyPressed && keyCode == CONTROL){
       //println("zooming");
-      camera1.zoom(radians(mouseY - pmouseY) / 2.0);
+     // camera1.zoom(radians(mouseY - pmouseY) / 2.0);
     }
 }

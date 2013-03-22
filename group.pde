@@ -33,7 +33,7 @@ class group{
     //println("building group here: (" + x + ", " + y + ")" );
     //block(int xpos, int ypos, int zpos, int size, float ang, int rotateAboutX, int rotateAboutY)
     id = type;
-    int size = 12;
+    int size = 10;
     switch(type){
      case 1:
        blocks.add(new block( x, y, 0, size, yaw, 0 * size, 0, 0));

@@ -34,12 +34,16 @@ class block{
    void setSelected(boolean state){
      selected = state;
    } 
+   
    boolean hide = false;
+   
    void hide(){
        hide = true;
        selected = false;
    }
+   
    float clock = -TWO_PI;
+   
    void draw(float yaw, float pitch, float timer){
      
      //yaw = y;
@@ -80,14 +84,14 @@ class block{
        //rotateX(yaw);
        rotateX(pitch);
        rotateZ(yaw);
-       rotateZ(clock);
+       rotateY(clock);
        
        translate(rotateX, rotateY, rotateZ);
        fill(selected ? color(cc, 90) : cc);
        if(selected)
          stroke(color(125,223,252));
        else
-        stroke(0);
+         noStroke();//stroke(0);
        strokeWeight(selected ? 1.0 : 0.5);
        
        box(size);
